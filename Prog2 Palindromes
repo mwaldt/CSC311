@@ -14,81 +14,87 @@
 	.data	# Data declaration section
 Prompt: .asciiz	"\n Please Input an integer: "
 Input:	.asciiz "\n The original input was: "
-Result: .asciiz "The result of the integers is "
+Result: .asciiz "\n The palindrome result is: "
 Bye: 	.asciiz "\n ****** Have a good day ******"
+
+T1:	.asciiz "\nt1= "
+T2:	.asciiz "\nt2= "
 	.globl	main
 	.text
-
+	
 ###########################################
 main:		# Start of code section
 
 #Prompt user for input
-	li	$v0, 4		#System call code for Print String
-	la	$a0, Prompt	#load address of prompt into $a0
+	li	$v0, 4			#System call code for Print String
+	la	$a0, Prompt		#load address of prompt into $a0
 	syscall			#print the prompt message
 	
 #Wait on input
-	li	$v0, 5		#system call code for Read Integer
-	syscall			#reads the value of N into $v0
-	blez	$v0, End 	#branch to end if $v0 <= 0
+	li		$v0, 5		#system call code for Read Integer
+	syscall				#reads the value of N into $v0
+	blez 	$v0	Exit	#branch if input is 0
+	
+	#li		$t0, 265
+	move	$t0, $v0	#copy $v0 to $t0, this will be the original input value
+	move	$t1, $t0	#copy $t0 to $t1, stepwise original
+	li		$t5, 10		#load value 16 into $t5
 	
 #Setup for palindrome calculations and checking
-	move	$t0, $v0	#copy $v0 to $t0, this will be the original input value
-	move	$t1, $t0	#copy $t0 to $t1, non-reversed, incremented, divided
-	li		$t2, 2		#Load value 2 into $t2
-	li		$t3, 0 		#load 0 into $t3, reversed, incremented
-	li		$t5, 10		#load value 10 into $t5
-	move	$t6, $t0 	#copy $t0 to $t6, non-reversed, incremented, not divided
-
-###########################################
-
-Reversal:
-
-	divu	$t1, $t2		#divide $t1 by $t2 (2)
-	move	$t1, $Lo		#move LO to $t1, quotient
-	move	$t4, $Hi		#move HI to $t4, remainder
-	mult	$t3, $t5		#multiply $t3 by $t5(10)
-	add		$t3, $t3, t4	#add $t3 and $t4, store in $t3
-
-	#branch to palindrome check
-	blt	NumberCheck	$t1
-	#repeat loop
-	b 		Reversal
+Initialize:
 	
+	move	$t2, $t1	#copy $t0 to $t1, stepwise arithmetic
+	li		$t3, 0 		#load 0 into $t3, stepwise flipped
+	li		$t4, 0		#load 0 into $t4, stepwise remainder
+	b		Reversal
+
+#loop
+Reversal:
+	div		$t2, $t5			#divide $t1 by $t5
+	mflo	$t2, 				#move LO to $t1, quotient
+	mfhi	$t4,				#move HI to $t4, remainder
+	mult	$t3, $t5			#multiply $t3 by $t5(10)
+	mflo	$t3					#
+	add		$t3, $t3, $t4		#add $t3 and $t4, store in $t3
+	blez	$t2 NumberCheck		#branch to palindrome check
+	b 		Reversal			#repeat loop
+
 ###########################################
 
 NumberCheck:
-	bne	PreReversal	$t6, $t3	#branch back to Reversal loop
-	beq	End		$t6, $t3	#branch to End
+	bne		$t1, $t3	SumReversal		#branch back to Reversal loop
+	beq		$t1, $t3	End				#branch to End
 
 ###########################################
 
-PreReversal:
-	add		$t1, $t6, $t3
-	b		Reversal
-	
+SumReversal:
+	add		$t1, $t1, $t3
+	b 		Initialize
+
 ###########################################
 	
 End:
-	li	$v0, 4		#System call code for Print String
-	la	$a0, Input	#load address of msg into $a0
-	syscall			#print the string
-	
-	li	$v0, 4		#System call code for Print String
-	la	$a0, $t0	#load address of msg into $a0
-	syscall			#print the string
+	li		$v0, 4		#System call code for Print String
+	la		$a0, Input	#load address of msg into $a0
+	syscall				#print the string
+		
+	li		$v0, 1		#System call code for Print String
+	move	$a0, $t0	#load address of msg into $a0
+	syscall				#print the string
 
-	li	$v0, 4		#System call code for Print String
-	la	$a0, Result	#load address of msg into $a0
-	syscall			#print the string
+	li		$v0, 4		#System call code for Print String
+	la		$a0, Result	#load address of msg into $a0
+	syscall				#print the string
 	
-	li	$v0, 4		#System call code for Print String
-	la	$a0, $t6	#load address of msg into $a0
-	syscall			#print the string
+	li		$v0, 1		#System call code for Print String
+	move	$a0, $t1	#load address of msg into $a0
+	syscall				#print the string
 	
-	li	$v0, 4		#System call code for Print String
-	la	$a0, Bye	#load address of msg into $a0
-	syscall			#print the string
-	li	$v0, 10		#terminate program run and
-	syscall			#return control to the system
+	li		$v0, 4		#System call code for Print String
+	la		$a0, Bye	#load address of msg into $a0
+	syscall				#print the string
+	
+Exit:
+	li		$v0, 10		#terminate program run and
+	syscall				#return control to the system
 # END OF PROGRAM
