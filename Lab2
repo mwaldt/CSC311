@@ -1,0 +1,173 @@
+##############################################
+# Program Name: Assignment 1 Palindromes
+# Programmer: Max Waldt
+# Date 02/3/15
+#############################################
+# Functional Description:
+# A program to find palindromes from integers a user inputs
+#############################################
+# Cross References:
+# v0: N,
+# t0: Sum
+###########################################
+
+	.data	# Data declaration section
+X1: .asciiz	"\n Please input coordinates x1: "
+Y1: .asciiz	"\n Please input coordinates y1: "
+X2: .asciiz	"\n Please input coordinates x2: "
+Y2: .asciiz	"\n Please input coordinates y2: "
+
+MC: .asciiz "\n To calculate the area of a circle enter 1"
+MS: .asciiz "\n To calculate the area of a square enter 2"
+MR: .asciiz "\n To calculate the area of a rectangle enter 3"
+EX: .asciiz "\n To exit enter 3"
+
+MI: .asciiz "\n Input: "
+
+CT:	.asciiz "\n The area of a circle is: "
+ST: .asciiz "\n The area of a square is: "
+RT: .asciiz "\n The area of a rectangle is: "
+
+Bye: .asciiz "\n ****** Program Terminated ******"
+
+
+	.globl	main
+	.text
+	
+###########################################
+main:		# Start of code section
+
+Inputs:
+#Prompt user for input x1
+	li	$v0, 4			#System call code for Print String
+	la	$a0, X1			#load address of prompt into $a0
+	syscall				#print the prompt message
+	
+#Wait on input
+	li		$v0, 5		#system call code for Read Integer
+	syscall				#reads the value of N into $v0
+	move $s0, $v0
+
+###########################################	
+	
+#Prompt user for input y1
+	li		$v0, 4			#System call code for Print String
+	la		$a0, Y1			#load address of prompt into $a0
+	syscall					#print the prompt message
+	
+#Wait on input
+	li		$v0, 5			#system call code for Read Integer
+	syscall					#reads the value of N into $v0
+	move 	$s1, $v0
+
+###########################################
+
+#Prompt user for input x2
+	li		$v0, 4			#System call code for Print String
+	la		$a0, X2			#load address of prompt into $a0
+	syscall
+	
+#Wait on input
+	li		$v0, 5			#system call code for Read Integer
+	syscall					#reads the value of N into $v0
+	move 	$s2, $v0
+
+###########################################
+
+#Prompt user for input y2
+	li		$v0, 4			#System call code for Print String
+	la		$a0, Y2			#load address of prompt into $a0
+	syscall					#print the prompt message
+	
+#Wait on input
+	li		$v0, 5			#system call code for Read Integer
+	syscall					#reads the value of N into $v0
+	move 	$s3, $v0
+
+
+###########################################
+#Menu
+
+	li		$v0, 4			#System call code for Print String
+	la		$a0, MC			#load address of prompt into $a0
+	syscall					#print the prompt message
+
+	li		$v0, 4			#System call code for Print String
+	la		$a0, MS			#load address of prompt into $a0
+	syscall					#print the prompt message
+
+	li		$v0, 4			#System call code for Print String
+	la		$a0, MR			#load address of prompt into $a0
+	syscall					#print the prompt message
+	
+	li		$v0, 4			#System call code for Print String
+	la		$a0, EX			#load address of prompt into $a0
+	syscall					#print the prompt message
+	
+	li		$v0, 4			#System call code for Print String
+	la		$a0, MI			#load address of prompt into $a0
+	syscall					#print the prompt message
+	
+	#Wait on input
+	li		$v0, 5			#system call code for Read Integer
+	syscall					#reads the value of N into $v0
+	
+	move 	$s4, $v0
+	li 		$s5, 0
+	
+	beq		$s4, 0, Exit
+	beq		$s4, 1,	Circle
+	beq		$s4, 2, Square
+	li,		$s5, 1
+	beq		$s4, 3, Calculations
+###########################################
+Square:
+	li 		$s5, 2
+	b 		Calculations
+###########################################
+Circle:
+	#Variables
+	li  	$t7, 314156			#Pi*10,000
+	li  	$t8, 100000			#10,000
+	b		Calculations
+###########################################
+Calculations:
+	sub 	$t0, $s2, $s0		#x2-x1
+	sub		$t1, $s3, $s1		#y2-y1
+	beq		$s5, 1, RectangleArea 		
+	mul		$t2, $t0, $t0		#(x2-x1)^2
+	mul		$t3, $t1, $t1		#(y2-y1)^2
+	beq		$s5, 2, SquareArea
+	add 	$t4, $t3, $t2		#r^2 = (x2-x1)^2 + (y2-y1)^2 or A = side^2
+	mul 	$t5, $t4, $t7		#314156 * r^2
+	div 	$t5, $t8			#(314156 * r^2)/10000
+	mflo	$t6
+	li		$v0, 4				#System call code for Print String
+	la		$a0, CT				#load address of prompt into $a0
+	syscall
+	b		AreaPrint
+###########################################	
+SquareArea:
+	add		$t6, $t2, $t3
+	li		$v0, 4				#System call code for Print String
+	la		$a0, ST				#load address of prompt into $a0
+	syscall
+	b		AreaPrint
+###########################################	
+RectangleArea:
+	mul		$t6, $t0, $t1
+	li		$v0, 4				#System call code for Print String
+	la		$a0, RT				#load address of prompt into $a0
+	syscall
+	b		AreaPrint
+###########################################	
+AreaPrint:
+	li		$v0, 1				#System call code for Print String
+	move	$a0, $t6			#load address of prompt into $a0
+	syscall
+	b Exit
+###########################################	
+Exit:
+	li		$v0, 10		#terminate program run and
+	syscall				#return control to the system
+# END OF PROGRAM
